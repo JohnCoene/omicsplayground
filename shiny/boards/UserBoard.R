@@ -102,6 +102,10 @@ UserBoard <- function(input, output, session, env)
         
     output$plan <- renderUI({
         plan_class <- "info"
+
+        if(user$level() == "free")
+            shinyjs::hide("manage")
+
         if(user$level() == "premium")
             plan_class <- "success"
         cl <- sprintf("badge badge-%s", plan_class)
@@ -109,13 +113,6 @@ UserBoard <- function(input, output, session, env)
             span("Subscription level", style="color:grey;"),
             span(class = cl, tools::toTitleCase(user$level()))
         )
-    })
-
-    observeEvent(user$plan(), {
-        if(user$plan() != "free")
-            return()
-
-        shinyjs::hide("manage")
     })
 
     observeEvent(input$manage, {        
