@@ -22,14 +22,37 @@ UserInputs <- function(id) {
 UserUI <- function(id) {
     ns <- shiny::NS(id)  ## namespace
     shiny::fillCol(
-               height = 750,
-               shiny::tabsetPanel(
-                          id = ns("tabs"),
-                          shiny::tabPanel("User settings",uiOutput(ns("userinfo_UI")))
-                          ## shiny::tabPanel("Visitors map",uiOutput(ns("usersmap_UI")))
-                          ## shiny::tabPanel("Community forum",uiOutput(ns("forum_UI")))
-                      )
-           )
+        height = 750,
+        shiny::tabsetPanel(
+            id = ns("tabs"),
+            shiny::tabPanel(
+                "User settings",
+                fillCol(
+                    flex = c(1,1),
+                    height = 600,
+                    fillRow(
+                        flex=c(0.8,0.2,1,0.2,1),
+                        tagList(
+                            shiny::h4("News"),            
+                            shiny::htmlOutput(ns("news"))
+                        ),br(),
+                        tagList(
+                            shiny::h4("Personal"),
+                            uiOutput(ns("plan")),                    
+                            shiny::tableOutput(ns("userdata"))
+                        ),br(),
+                        tagList(
+                            shiny::h4("Settings"),            
+                            shinyWidgets::prettySwitch(ns("enable_beta"),"enable beta features")
+                        )
+                    ),
+                    shiny::actionButton(ns("manage"),"Manage Subscription")
+                )
+            )
+            ## shiny::tabPanel("Visitors map",uiOutput(ns("usersmap_UI")))
+            ## shiny::tabPanel("Community forum",uiOutput(ns("forum_UI")))
+        )
+    )
 }
 
 UserBoard <- function(input, output, session, env)
@@ -86,6 +109,13 @@ UserBoard <- function(input, output, session, env)
             span("Subscription level", style="color:grey;"),
             span(class = cl, tools::toTitleCase(user$level()))
         )
+    })
+
+    observeEvent(user$plan(), {
+        if(user$plan() != "free")
+            return()
+
+        shinyjs::hide("manage")
     })
 
     observeEvent(input$manage, {        
@@ -147,48 +177,6 @@ UserBoard <- function(input, output, session, env)
     ## User interface
     ##-----------------------------------------------------------------------------
     output$inputsUI <- shiny::renderUI({ })
-
-    output$userinfo_UI <- shiny::renderUI({
-
-        dbg("[UserBoard::userinfo_UI] !!! userinfo_UI reacted !!!")
-        dbg("[UserBoard::userinfo_UI] !!! user$stripe_id() = ", user$stripe_id() )                
-        manage.subcriptions.ui <- tagList()
-        if( length(user$stripe_id()) && user$stripe_id()!="" ){
-            manage.subcriptions.ui <- tagList(
-                h4("Subscriptions"),
-                shiny::actionButton(ns("manage"),"Manage Subscription"),
-                shiny::actionButton(ns("upgrade"),"Upgrade", onClick='upgrade_plan()'),
-                br(),
-                br(),
-                shiny::div(id = "user-subs")
-            )
-        }
-        
-        fillCol(
-            flex = c(1,1),
-            height = 600,
-            fillRow(
-                flex=c(0.8,0.2,1,0.2,1),
-                tagList(
-                    shiny::h4("News"),            
-                    shiny::htmlOutput(ns("news"))
-                    ##shinyWidgets::prettySwitch(ns("enable_alpha"),"enable alpha features")
-                ),br(),
-                tagList(
-                    shiny::h4("Personal"),
-                    uiOutput(ns("plan")),                    
-                    shiny::tableOutput(ns("userdata"))
-                ),br(),
-                tagList(
-                    shiny::h4("Settings"),            
-                    shinyWidgets::prettySwitch(ns("enable_beta"),"enable beta features")
-                )
-            ),
-            manage.subcriptions.ui
-        )
-    })
-    shiny::outputOptions(output, "userinfo_UI", suspendWhenHidden=FALSE) ## important!
-
 
     ##---------------------------------------------------------------
     ##--------------------- modules for UsersMap --------------------
