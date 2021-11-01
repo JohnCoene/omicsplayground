@@ -144,7 +144,7 @@ FirebaseAuthenticationModule <- function(input, output, session)
     )    
 
     firebase <- firebase::FirebaseUI$
-        new(persistence = "session")$ # instantiate
+        new(persistence = "local")$ # instantiate
         set_providers( # define providers
             email_link = TRUE, 
             google = TRUE

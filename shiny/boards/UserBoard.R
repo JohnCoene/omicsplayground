@@ -9,7 +9,12 @@ UserInputs <- function(id) {
     ns <- shiny::NS(id)
     shiny::tagList(
                HTML("<h3>User Settings</h3><br><br>"),
-               shiny::uiOutput(ns("description"))
+               tags$a(
+                   "Upgrade",
+                   class = "btn btn-default",
+                   onClick = "upgrade()"
+               ),
+               shiny::uiOutput(ns("description")),
                ## shiny::uiOutput(ns("inputsUI"))
            )
 }
